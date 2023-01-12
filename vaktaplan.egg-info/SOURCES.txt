@@ -1,0 +1,11 @@
+MANIFEST.in
+fim_proto.docx
+setup.cfg
+setup.py
+vaktaplan.py
+vaktaplan.egg-info/PKG-INFO
+vaktaplan.egg-info/SOURCES.txt
+vaktaplan.egg-info/dependency_links.txt
+vaktaplan.egg-info/entry_points.txt
+vaktaplan.egg-info/requires.txt
+vaktaplan.egg-info/top_level.txt
