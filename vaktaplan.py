@@ -104,7 +104,7 @@ def main():
     os.makedirs(output_folder,exist_ok=True)
     
     if args.generate_dayplans: #tempfile ruglið
-        make_and_save_zip_file(save_location='/Users/odinndagur/Desktop/',zip_name="delivery.zip",plan=plan)
+        make_and_save_zip_file(save_location=output_folder,zip_name=f'{file_base_name}.zip',plan=plan)
 
 
 def make_and_save_zip_file(save_location,zip_name,plan):
@@ -321,7 +321,21 @@ class Vaktaplan:
         new_h,new_w = pdfs[0].height, pdfs[0].width
 
         tables = camelot.read_pdf(file,pages='1-end',flavor='lattice',line_scale=50,line_tol=1)
-        cls.add_shift_text(tables)
+        # cls.add_shift_text(tables)
+
+        """
+        Adds the color information in the text of the cell
+        so we know what kind of shift it is when it's a csv
+        with no colors.
+        """
+        for page_num,table in enumerate(tables):
+            df = table.df
+            for row_num,row in enumerate(table.cells):
+                for col_num,cell in enumerate(row):
+                    cell_color = cls.get_color(pdfs[page_num],cell=cell)
+                    if cell_color in cls.colors and (cell.text != '') and re.match('[0-9][0-9]:[0-9][0-9]-[0-9][0-9]:[0-9][0-9]',cell.text):
+                        df.iloc[row_num,col_num] += ' ' + cls.colors[cell_color]
+
         processed_dfs = [cls.process_df(table) for table in tables]
         # concat fyrst
         # concatenated_dfs = [pd.concat(processed_dfs[offset:offset+cls.get_num_pages(tables)]) for offset in range(0,tables.n,cls.get_num_pages(tables))]
@@ -435,20 +449,20 @@ class Vaktaplan:
         (128, 0, 64): 'AS',
         }
 
-    @classmethod
-    def add_shift_text(cls,tables) -> None:
-        """
-        Adds the color information in the text of the cell
-        so we know what kind of shift it is when it's a csv
-        with no colors.
-        """
-        for page_num,table in enumerate(tables):
-            df = table.df
-            for row_num,row in enumerate(table.cells):
-                for col_num,cell in enumerate(row):
-                    cell_color = cls.get_color(pdfs[page_num],cell=cell)
-                    if cell_color in cls.colors and (cell.text != '') and re.match('[0-9][0-9]:[0-9][0-9]-[0-9][0-9]:[0-9][0-9]',cell.text):
-                        df.iloc[row_num,col_num] += ' ' + cls.colors[cell_color]
+    # @classmethod
+    # def add_shift_text(cls,tables) -> None:
+    #     """
+    #     Adds the color information in the text of the cell
+    #     so we know what kind of shift it is when it's a csv
+    #     with no colors.
+    #     """
+    #     for page_num,table in enumerate(tables):
+    #         df = table.df
+    #         for row_num,row in enumerate(table.cells):
+    #             for col_num,cell in enumerate(row):
+    #                 cell_color = cls.get_color(pdfs[page_num],cell=cell)
+    #                 if cell_color in cls.colors and (cell.text != '') and re.match('[0-9][0-9]:[0-9][0-9]-[0-9][0-9]:[0-9][0-9]',cell.text):
+    #                     df.iloc[row_num,col_num] += ' ' + cls.colors[cell_color]
 
     @classmethod
     def process_df(cls,table) -> pd.DataFrame:
