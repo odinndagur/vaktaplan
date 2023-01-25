@@ -206,7 +206,7 @@ class Work_day:
         """
         # doc = docx.Document(os.path.join(os.path.dirname(os.path.abspath(__file__)),'fim_proto.docx'))
         # doc = docx.Document('fim_proto.docx')
-        doc = docx.Document(os.path.join(os.path.dirname(__file__),'fim_proto.docx'))
+        doc = docx.Document('fim_proto.docx')
         for col_idx,col in enumerate(doc.tables[1].columns):
             for cell in doc.tables[1].column_cells(col_idx):
                 if cell.text.strip() == 'dags':
@@ -289,9 +289,11 @@ class Vaktaplan:
                     break
                 if shift == 'ORLOF':
                     break
-                time, *type = shift.split(' ')
-                if not type:
+                time, *shift_type = shift.split(' ')
+                if not shift_type:
                     break
+                if len(shift_type) == 1:
+                    shift_type = shift_type[0]
 
                 start_time,end_time = time.split('-')
                 start_hours,start_minutes = map(int,start_time.split(':'))
@@ -302,7 +304,7 @@ class Vaktaplan:
                 start_datetime = datetime.datetime(year=year,month=month,day=day,hour=start_hours,minute=start_minutes)
                 end_datetime = datetime.datetime(year=year,month=month,day=day,hour=end_hours,minute=end_minutes)
 
-                day_shifts.append(Shift(person=person,shift_type=type,start_datetime=start_datetime,end_datetime=end_datetime))
+                day_shifts.append(Shift(person=person,shift_type=shift_type,start_datetime=start_datetime,end_datetime=end_datetime))
             if day_shifts:
                 yield Work_day(shifts=day_shifts)
 
